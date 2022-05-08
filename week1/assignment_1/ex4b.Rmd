@@ -1,0 +1,53 @@
+---
+title: "Assignment 1 - Exercise 4 b"
+author: "Niels Krarup"
+date: '2022-05-07'
+output: html_document
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(mvtnorm)
+library(dplyr)
+library(plotly)
+
+```
+
+## Exercise 4.b - testing by simulation
+
+```{r, fig.width=12}
+# 4) ----------------------------------------------------------------------
+n <- 1e4
+#Covariance matrix from Exercise 3
+sigma <- matrix(c(1,-1, -1,
+                  -1, 2, 3,
+                  -1, 3, 6), nrow = 3, byrow = T)
+sigma
+
+#simulating (X,Y,Z)
+xyz <- rmvnorm(n = n, sigma = sigma)
+y <-xyz[,2]
+
+#our best beta from assignment
+b <- c(-3, 2)/5
+
+#Expected squared error - function
+mse <- function(b){
+  mean((y - b%*%t(xyz[ ,c(1,3)]) )^2 )
+}
+#test 
+(min <- mse(b = b))
+
+
+#grid of beta's
+b1 <- seq(from = -3, to = 3, length.out = 1e2)
+b2 <- seq(from = -5, to = 5,length.out = 1e2)
+b_grid <- expand.grid(b1 = b1, b2 = b2)
+
+#add mse for each beta vector
+mse_vec <- apply(X = b_grid, MARGIN = 1, FUN = function(vec) mse(b = vec))
+#set as matrix for plotting
+mse_mat <- matrix(data = mse_vec, nrow = length(b1), ncol = length(b2), byrow = T)
+#plot
+plot_ly(x = b1, y = b2, z = mse_mat) %>% add_surface() %>% add_markers(x = b[1], y = b[2], z = min)
+```
