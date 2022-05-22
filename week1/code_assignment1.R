@@ -1,4 +1,5 @@
 n <- 1e3
+library(dplyr)
 
 NX <- rnorm(n)
 NY <- rnorm(n)
@@ -8,6 +9,17 @@ NZ <- rnorm(n)
 X <- NX
 Y <- -X + NY
 Z <- X + 2*Y + NZ
+cov(data.frame(X,Y,Z)) %>% round(0)
+
+#part 2
+n <- 1e3
+
+Y <- rnorm(n = n, sd = sqrt(2))
+X <- -1/2*Y + rnorm(n = n, sd = sqrt(1/2))
+Z <- 1*X + 2*Y + rnorm(n = n, sd = sqrt(1))
+
+df <- data.frame(X,Y,Z)
+round(cov(df),0)
 
 var(X)
 var(Y)

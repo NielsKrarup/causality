@@ -1,0 +1,80 @@
+---
+title: "Assignment 2"
+author: "Niels Krarup"
+date: '2022-05-07'
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, echo=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
+
+```
+
+## Exercise 4.b - Finding minimum by numeric optimization
+
+To find the minimum we use the stats::optim function from default R.
+
+```{r, fig.align='center', fig.width=12}
+fooX <- function(x) ((x-1)^2 + (x-3)^4 + 1)
+fooY <- function(y) (2 + y^2)
+#num
+optX <- optim(2, fooX, method = "Brent", lower = 0, upper = 10)
+optY <- optim(2, fooY, method = "Brent", lower = 0, upper = 10)
+
+plot(fooX, xlim = c(-2,4), ylim = c(1,6), ylab = "EZ;do(.)")
+points(optX$par, optX$value)
+abline(v = optX$par, lty = 2)
+
+
+curve(fooY, col = 2, add = T)
+points(optY$par, optY$value, col = 2)
+abline(v = optY$par, lty = 2, col = 2)
+
+legend("topright", c("Do(X:=x)", "Do(Y := y)"), col = 1:2, lty = 1)
+```
+
+
+## Looking at solutions.
+
+expected value of Z given X intervention
+```{r}
+optX[c("par", "value")]
+```
+expected value of Z given Y intervention
+```{r}
+optY[c("par", "value")]
+```
+it is seen that the minimum value is attained by intervening on $Y$ with at $do(Y := 0)$ with a corresponding expected value of $Z$ of $2$.
+
+# b)
+```{r, fig.align='center', fig.width=12}
+foo_cf_X <- function(x) (x-3)^4 + (x-1)^2 -8*(x-3)^2 + 16
+foo_cf_Y <- function(y) y^2 + 4
+#num
+
+plot(foo_cf_X, xlim = c(-2, 6), ylim = c(0,30), ylab = "EZ|(X,Y,Z) = (3,-4,20);do(.)")
+curve(foo_cf_Y, col = 2, add = T)
+abline(h = min(optX$value, optY$value), lty = 2)
+legend("topleft", c("Z|(X,Y,Z) = (3,-4,20);do(X=x)", "Z|(X,Y,Z) = (3,-4,20);do(Y=Y)"), col = 1:2, lty = 1)
+
+```
+
+It can be seen from above that the lowest expected value of Z i.e. 2, which was from the intervention $do(Y:=0)$ is only possible to attai by interveening on $X$ given the observations.
+
+We solve to finde these values
+
+```{r}
+r1 <- uniroot(f = function(x)foo_cf_X(x = x) - 2, lower = 0, upper = 1)
+r2 <- uniroot(f = function(x)foo_cf_X(x = x) - 2, lower = 1, upper = 4)
+plot(foo_cf_X, xlim = c(-2, 6), ylim = c(0,30), ylab = "EZ|(X,Y,Z) = (3,-4,20);do(.)")
+abline(h = 2, lty = 2)
+abline(v = c(r1$root, r2$root), col = 3, lty = 3)
+```
+
+the interventions on $X$ with counterfactuals equal to smallest expected value of Z are: 
+`r round(c(r1$root, r2$root),4) `
+
+# end of document
